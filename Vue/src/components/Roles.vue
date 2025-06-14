@@ -24,7 +24,8 @@
                     <td>{{ role.primary_function }}</td>
                     <td>{{ role.key_attributes }}</td>
                     <td>
-                        <button class="w3-btn w3-blue" @click="updateClicked(role._id, role.role, role.logo_url, role.primary_function, role.key_attributes)">Update</button>
+                        <button class="w3-btn w3-blue"
+                            @click="updateClicked(role._id, role.role, role.logo_url, role.primary_function, role.key_attributes)">Update</button>
                         &nbsp;
                         <button class="w3-btn w3-blue" @click="deleteClicked(role._id)">Delete</button>
                     </td>
@@ -33,9 +34,13 @@
         </table>
     </div>
     <div v-show="activeSection === 'upsert'">
+        <div class="w3-panel w3-pale-red w3-border" v-show="saveErrors">
+            <h3>Please correct the following errors:</h3>
+            <p>{{ saveErrors }}</p>
+        </div>
         <div class="w3-card-4">
             <div class="w3-container w3-black" style="margin-bottom: 5px;">
-                <h2>Add Role</h2>
+                <h2>{{ roleId ? 'Update Role' : 'Add Role' }}</h2>
             </div>
             <form class="w3-container">
                 <div style="margin-bottom: 20px;">
@@ -129,6 +134,18 @@ export default {
             this.activeSection = 'search';
         },
         async saveClicked() {
+            if (this.roleModel === "") {
+                this.saveErrors = "Role is required.";
+                return;
+            }
+
+            this.loadRoles();
+            const duplicateRole = this.roles.filter(role => role.role.toLowerCase() === this.roleModel.trim().toLowerCase() && role.id !== this.roleId);
+            if (duplicateRole.length > 0) {
+                this.saveErrors = "Role already exists.";
+                return;
+            }
+
             let query = "";
             let variables = {};
 
@@ -149,7 +166,7 @@ export default {
                         key_attributes: this.keyAttributesModel.trim()
                     },
                     _id: this.roleId
-                };    
+                };
             }
             else {
                 query = `
@@ -184,15 +201,6 @@ export default {
             this.resetUpsertForm();
             this.loadRoles();
             this.activeSection = 'search';
-        },
-        resetUpsertForm() {
-            this.roleId = null;
-            this.roleModel = "";
-            this.logoUrlModel = "";
-            this.primaryFunctionModel = "";
-            this.keyAttributesModel = "";
-
-            this.saveErrors = "";
         },
         resetSearchMessages() {
             this.saveSuccessMsg = "";
