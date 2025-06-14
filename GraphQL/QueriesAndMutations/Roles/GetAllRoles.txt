@@ -1,0 +1,9 @@
+query GetAllRoles {
+  roles {
+    _id
+    role
+    logo_url
+    primary_function
+    key_attributes
+  }
+}

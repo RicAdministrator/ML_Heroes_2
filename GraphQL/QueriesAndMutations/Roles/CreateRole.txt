@@ -1,0 +1,19 @@
+Operation:
+mutation CreateRole($role: AddRoleInput!) {
+  addRole(role: $role) {
+    role
+    logo_url
+    primary_function
+    key_attributes
+  }
+}
+
+Variables:
+{
+  "role": {
+    "role": "a new role",
+    "logo_url": "Hello",
+    "primary_function": "hello",
+    "key_attributes": "hello"
+  }
+}

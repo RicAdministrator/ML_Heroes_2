@@ -1,0 +1,11 @@
+Operation:
+mutation DeleteRole($_id: ID!) {
+  deleteRole(_id: $_id) {
+    _id
+  }
+}
+
+Variables:
+{
+  "_id":"684db3e0501b80136217b911",
+}

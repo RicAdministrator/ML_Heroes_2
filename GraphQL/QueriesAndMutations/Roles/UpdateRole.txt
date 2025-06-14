@@ -1,0 +1,17 @@
+Operation:
+mutation UpdateRole($edits: AddRoleInput!, $_id: ID!) {
+  updateRole(edits: $edits, _id: $_id) {
+    _id
+  }
+}
+
+Variables:
+{
+  "edits": {
+    "role": "b",
+    "logo_url": "b",
+    "primary_function": "b",
+    "key_attributes": "b"
+  },
+  "_id": "684de6708d2d8f4cd2644409"
+}
