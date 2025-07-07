@@ -5,6 +5,10 @@
             <h3>Success!</h3>
             <p>{{ saveSuccessMsg ? saveSuccessMsg : deleteSuccessMsg }}</p>
         </div>
+        <div class="w3-panel w3-pale-red w3-border" v-show="deleteErrorMsg">
+            <h3>Please correct the following errors:</h3>
+            <p>{{ deleteErrorMsg }}</p>
+        </div>
         <table style="margin-top: 5px;">
             <thead>
                 <tr style="background-color: #2196f3;">
@@ -107,7 +111,7 @@ export default {
                     key_attributes
                     }
                 }
-                `;
+            `;
             const response = await fetch('http://localhost:4000/graphql', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -151,11 +155,11 @@ export default {
 
             if (this.roleId) {
                 query = `
-                mutation UpdateRole($edits: AddRoleInput!, $_id: ID!) {
-                    updateRole(edits: $edits, _id: $_id) {
-                        _id
+                    mutation UpdateRole($edits: AddRoleInput!, $_id: ID!) {
+                        updateRole(edits: $edits, _id: $_id) {
+                            _id
+                        }
                     }
-                }
                 `;
 
                 variables = {
@@ -170,14 +174,14 @@ export default {
             }
             else {
                 query = `
-                mutation AddRole($role: AddRoleInput!) {
-                    addRole(role: $role) {
-                    role
-                    logo_url
-                    primary_function
-                    key_attributes
+                    mutation AddRole($role: AddRoleInput!) {
+                        addRole(role: $role) {
+                            role
+                            logo_url
+                            primary_function
+                            key_attributes
+                        }
                     }
-                }
                 `;
 
                 variables = {
@@ -210,37 +214,32 @@ export default {
         async deleteClicked(_id) {
             this.resetSearchMessages();
 
-            // try {
-            //     const response = await fetch('http://localhost:3001/api/hero_roles');
-            //     if (!response.ok) {
-            //         throw new Error(`HTTP error! Status: ${response.status}`);
-            //     }
+            const queryHeroRoles = `
+                query GetAllHeroRolesByRoleId($roleId: ID!) {
+                    heroRolesByRoleId(roleId: $roleId) {
+                        _id
+                        hero_id
+                        role_id
+                    }
+                }
+            `;
 
-            //     const heroRoles = await response.json();
-            //     const heroesWithSpecificRole = heroRoles.filter(heroRole => heroRole.role_id === id);
+            const variablesHeroRoles = {
+                roleId: _id,
+            }
 
-            //     if (heroesWithSpecificRole.length > 0) {
-            //         this.deleteErrorMsg = "This role is assigned to one or more heroes. Please remove the role from the heroes before deleting it.";
-            //         return;
-            //     }
-            // } catch (error) {
-            //     console.log(error.message);
-            // }
+            const responseHeroRoles = await fetch('http://localhost:4000/graphql', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: queryHeroRoles, variables: variablesHeroRoles })
+            });
+            const resultHeroRoles = await responseHeroRoles.json();
+            const heroesUsingCurrentRole = resultHeroRoles.data.heroRolesByRoleId;
 
-            // try {
-            //     const response = await fetch(`http://localhost:3001/api/roles/${id}`, {
-            //         method: 'DELETE',
-            //     });
-            //     if (response.ok) {
-            //         console.log('Item deleted successfully');
-            //         this.deleteSuccessMsg = "Role was deleted successfully.";
-            //         this.loadRoles();
-            //     } else {
-            //         console.error('Error deleting item:', response.statusText);
-            //     }
-            // } catch (error) {
-            //     console.error('Error deleting item:', error);
-            // }
+            if (heroesUsingCurrentRole.length > 0) {
+                this.deleteErrorMsg = "This role is assigned to one or more heroes. Please remove the role from the heroes before deleting it.";
+                return;
+            }
 
             const query = `
                 mutation DeleteRole($_id: ID!) {
@@ -258,6 +257,7 @@ export default {
 
             this.deleteSuccessMsg = "Role was deleted successfully.";
             this.loadRoles();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         },
         updateClicked(_id, role, logoUrl, primaryFunction, keyAttributes) {
             this.resetSearchMessages();
