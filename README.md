@@ -5,8 +5,8 @@ API - GraphQL\
 Front End - Vue
 
 ## MongoDB
-steps to drop create the db:\
-1) right-click drop_create_db.py\
+steps to drop create the db:
+1. right-click drop_create_db.py\
 2) select "Run Python File in Terminal"
 
 ## GraphQL
